@@ -1,0 +1,10 @@
+{
+	"URI_Secret_Identifier": {
+		"type": "string",
+		"value": "https://mentoring-key-vault-soo.vault.azure.net/secrets/kvs-azurementoringlogappsso-HTTP-POST-URL/691a9d3fbb1d462c8c4157252f37d496?api-version=7.0"
+	},
+	"receiver": {
+		"type": "string",
+		"value": "santiago_osorio@epam.com"
+	}
+}

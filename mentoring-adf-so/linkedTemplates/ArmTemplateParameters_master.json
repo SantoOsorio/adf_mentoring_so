@@ -1,0 +1,39 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "mentoring-adf-so"
+		},
+		"LS_ABLB_azurementoringauso_connectionString": {
+			"value": ""
+		},
+		"LS_ABLB_azurementoringdatalakeso_properties_typeProperties_url": {
+			"value": "https://azurementoringdatalakeso.dfs.core.windows.net/"
+		},
+		"LS_ABLB_azurementoringstorageso_properties_typeProperties_sasUri_secretName": {
+			"value": "kvs-azurementoringstorageso-Blob-service-SAS-URL-F"
+		},
+		"LS_ABLB_azurementoringstorageso_online_properties_typeProperties_sasUri_secretName": {
+			"value": "kvs-azurementoringstorageso-online-SAS-URL"
+		},
+		"LS_AKV_mentoring_keyvault_soo_properties_typeProperties_baseUrl": {
+			"value": "https://mentoring-key-vault-soo.vault.azure.net/"
+		},
+		"LS_ASQL_DataMart_properties_typeProperties_connectionString_secretName": {
+			"value": "kvs-azuresqldb-datamart-etl-key"
+		},
+		"LS_ASQL_movies_properties_typeProperties_connectionString_secretName": {
+			"value": "kvs-azuresqldb-etl-key"
+		},
+		"LS_SQL_CinemaTickets_properties_typeProperties_connectionString_secretName": {
+			"value": "kvs-sqlserverdb-conn-key"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}
