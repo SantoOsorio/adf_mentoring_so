@@ -7,17 +7,17 @@ Refer to the table below for the short description of data sources:
 ![Data Sources](https://i.ibb.co/zGcy1pG/data-sources.png)
 
 These are the following modules that will be covered in this solution:
--Module #1 Environment setup
--Module #2 Copy activity in pipeline
--Module #3 Pipeline run consumption and cost analysis
--Module #4 Azure Integration Runtime
--Module #5 Loading Data to Azure SQL Database
--Module #6 Incremental copy from on-premises MS SQL
--Module #7 Incremental copy files
--Module #8 Data Flows
--Module #9 Metadata-driven ETL
--Module #10 Monitoring
--Module #11 Email Notification
+- Module #1 Environment setup
+- Module #2 Copy activity in pipeline
+- Module #3 Pipeline run consumption and cost analysis
+- Module #4 Azure Integration Runtime
+- Module #5 Loading Data to Azure SQL Database
+- Module #6 Incremental copy from on-premises MS SQL
+- Module #7 Incremental copy files
+- Module #8 Data Flows
+- Module #9 Metadata-driven ETL
+- Module #10 Monitoring
+- Module #11 Email Notification
 -Module #12 Integration with Git
 
 
