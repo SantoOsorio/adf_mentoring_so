@@ -1,0 +1,47 @@
+{
+	"name": "DS_SINK_ASQL_DataMart_dbo_DimOnlineService_v2",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ASQL_DataMart",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "ServiceKey",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "ServiceCode",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ServiceName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "CreatedDate",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "ModifiedDate",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "TypeOneRecordHash",
+				"type": "nvarchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "DimOnlineService"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

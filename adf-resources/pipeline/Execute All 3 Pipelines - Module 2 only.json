@@ -1,0 +1,63 @@
+{
+	"name": "Execute All 3 Pipelines - Module 2 only",
+	"properties": {
+		"activities": [
+			{
+				"name": "ForEach",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Module 2 Copy activity in pipeline foreach",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "DataFlow",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ForEach",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Module 2 Copy activity in pipeline DataFlow",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "FileExtension",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "DataFlow",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Module 2 Copy activity in pipeline using file extension",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2023-07-11T17:28:18Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

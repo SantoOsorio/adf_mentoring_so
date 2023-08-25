@@ -1,0 +1,48 @@
+{
+	"name": "DF_copy_files_to_azurementoringdatalakeso",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DS_SOURCE_azurementoringstorageso",
+						"type": "DatasetReference"
+					},
+					"name": "DsSourceAzurementoringstorageso"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DS_SINK_azurementoringdatalakesov2",
+						"type": "DatasetReference"
+					},
+					"name": "DsSinkAzurementoringdatalakeso"
+				}
+			],
+			"transformations": [
+				{
+					"name": "fileNameColumn"
+				}
+			],
+			"scriptLines": [
+				"source(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     rowUrlColumn: 'fileName',",
+				"     wildcardPaths:['*.csv']) ~> DsSourceAzurementoringstorageso",
+				"DsSourceAzurementoringstorageso derive(fileName = concat('/movies/',replace(fileName,'.csv',''),'_', toString(currentTimestamp(),'yyyyMMddHHmmss'),'.csv')) ~> fileNameColumn",
+				"fileNameColumn sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     rowUrlColumn:'fileName',",
+				"     truncate: true,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> DsSinkAzurementoringdatalakeso"
+			]
+		}
+	}
+}

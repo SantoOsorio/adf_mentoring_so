@@ -1,0 +1,17 @@
+{
+	"name": "DS_SOURCE_ASQL_DataMart_dbo_DimMovie",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ASQL_DataMart",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "DimMovie"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

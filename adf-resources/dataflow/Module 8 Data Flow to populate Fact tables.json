@@ -1,0 +1,187 @@
+{
+	"name": "Module 8 Data Flow to populate Fact tables",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DS_SOURCE_ASQL_movies_dbo_tOnlinePurchase",
+						"type": "DatasetReference"
+					},
+					"name": "MappingQueryForFactOnlinePurchase"
+				},
+				{
+					"dataset": {
+						"referenceName": "DS_SOURCE_ASQL_DataMart_dbo_DimOnlineService",
+						"type": "DatasetReference"
+					},
+					"name": "DimOnlineService"
+				},
+				{
+					"dataset": {
+						"referenceName": "DS_SOURCE_ASQL_DataMart_dbo_DimMovie",
+						"type": "DatasetReference"
+					},
+					"name": "DimMovie"
+				},
+				{
+					"dataset": {
+						"referenceName": "DS_SOURCE_ASQL_movies_dbo_tOnlinePurchase",
+						"type": "DatasetReference"
+					},
+					"name": "MappingQueryForFactOnlinePurchaseMonthlySnapshot"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DS_SINK_ASQL_DataMart_dbo_FactOnlinePurchase",
+						"type": "DatasetReference"
+					},
+					"name": "FactOnlinePurchase"
+				},
+				{
+					"dataset": {
+						"referenceName": "DS_SINK_DataMart_dbo_FactOnlinePurchaseMonthlySnapshot",
+						"type": "DatasetReference"
+					},
+					"name": "FactOnlinePurchaseMonthlySnapshot"
+				}
+			],
+			"transformations": [
+				{
+					"name": "GetServiceKey"
+				},
+				{
+					"name": "GetMovieKey"
+				},
+				{
+					"name": "TransformTransactionDate",
+					"description": "Transform [TransactionDate] to DateKey"
+				},
+				{
+					"name": "GetServiceKey2"
+				},
+				{
+					"name": "TransformTransactionDate2"
+				},
+				{
+					"name": "aggregate1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          TransactionDate as timestamp,",
+				"          ServiceCode as string,",
+				"          MovieIdNK as integer,",
+				"          Price as decimal(4,1),",
+				"          TransactionId as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: ' SELECT DISTINCT \\n   op.[TransactionDate], -- Sample value is 20221231\\n   os.ServiceCode,\\n --  [dbo].[DimOnlineService].[ServiceKey],     -- Find a way to get [dbo].[DimOnlineService].[ServiceKey] value from [dbo].[tOnlinePurchase].[ServiceId]\\n  m.MovieIdNK,\\n --  [dbo].[DimMovie].[MovieKey],               -- Find a way to get [dbo].[DimMovie].[MovieKey] value from [dbo].[tOnlinePurchase].[MovieId]\\n   op.[Price],\\n   op.[TransactionId]\\n FROM [dbo].[tOnlinePurchase] op\\n LEFT JOIN dbo.tOnlineService os ON op.ServiceId = os.ServiceId\\n LEFT JOIN dbo.tMovies m ON m.MovieId = op.MovieId',",
+				"     format: 'query') ~> MappingQueryForFactOnlinePurchase",
+				"source(output(",
+				"          ServiceKey as integer,",
+				"          ServiceCode as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT ServiceKey,ServiceCode FROM DimOnlineService',",
+				"     format: 'query') ~> DimOnlineService",
+				"source(output(",
+				"          MovieKey as integer,",
+				"          MovieIdNK as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: '  SELECT\\n       MovieKey,\\n      [MovieIdNK]     \\n  FROM [dbo].[DimMovie]',",
+				"     format: 'query') ~> DimMovie",
+				"source(output(",
+				"          TransactionDate as timestamp,",
+				"          ServiceCode as string,",
+				"          Price as decimal(4,1),",
+				"          TransactionId as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: ' SELECT DISTINCT \\n   op.[TransactionDate], -- Sample value is 20221231\\n   os.ServiceCode,\\n   op.[Price],\\n   op.[TransactionId]\\n FROM [dbo].[tOnlinePurchase] op\\n LEFT JOIN dbo.tOnlineService os ON op.ServiceId = os.ServiceId',",
+				"     format: 'query') ~> MappingQueryForFactOnlinePurchaseMonthlySnapshot",
+				"MappingQueryForFactOnlinePurchase, DimOnlineService join(MappingQueryForFactOnlinePurchase@ServiceCode == DimOnlineService@ServiceCode,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> GetServiceKey",
+				"GetServiceKey, DimMovie join(MappingQueryForFactOnlinePurchase@MovieIdNK == DimMovie@MovieIdNK,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> GetMovieKey",
+				"GetMovieKey derive(DateKey = toInteger(add(add(toString(year(TransactionDate)), lpad(toString(month(TransactionDate)), 2, '0') ), lpad(toString(dayOfMonth(TransactionDate)), 2, '0') ))) ~> TransformTransactionDate",
+				"MappingQueryForFactOnlinePurchaseMonthlySnapshot, DimOnlineService join(MappingQueryForFactOnlinePurchaseMonthlySnapshot@ServiceCode == DimOnlineService@ServiceCode,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> GetServiceKey2",
+				"GetServiceKey2 derive(MonthKey = toInteger(add(toString(year(TransactionDate)), lpad(toString(month(TransactionDate)), 2, '0') ) )) ~> TransformTransactionDate2",
+				"TransformTransactionDate2 aggregate(groupBy(MonthKey,",
+				"          ServiceKey),",
+				"     PurchaseAmount = sum(Price),",
+				"          PurchaseQuantity = count(TransactionId)) ~> aggregate1",
+				"TransformTransactionDate sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          DateKey as integer,",
+				"          OnlineServiceKey as integer,",
+				"          MovieKey as integer,",
+				"          Price as decimal(4,1),",
+				"          TransactionId as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     preSQLs:['TRUNCATE TABLE FactOnlinePurchase;'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          DateKey,",
+				"          OnlineServiceKey = ServiceKey,",
+				"          MovieKey,",
+				"          Price,",
+				"          TransactionId",
+				"     )) ~> FactOnlinePurchase",
+				"aggregate1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          MonthKey as integer,",
+				"          OnlineServiceKey as integer,",
+				"          PurchaseAmount as decimal(10,1),",
+				"          PurchaseQuantity as integer",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     preSQLs:['TRUNCATE TABLE FactOnlinePurchase_MonthlySnapshot'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          MonthKey,",
+				"          OnlineServiceKey = ServiceKey,",
+				"          PurchaseAmount,",
+				"          PurchaseQuantity",
+				"     )) ~> FactOnlinePurchaseMonthlySnapshot"
+			]
+		}
+	}
+}

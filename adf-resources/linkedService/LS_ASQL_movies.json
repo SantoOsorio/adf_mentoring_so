@@ -1,0 +1,19 @@
+{
+	"name": "LS_ASQL_movies",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureSqlDatabase",
+		"typeProperties": {
+			"connectionString": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "LS_AKV_mentoring_keyvault_soo",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "kvs-azuresqldb-etl-key",
+				"secretVersion": "b39a2b6bd32e433980e28d911c4d3d0e"
+			}
+		}
+	}
+}

@@ -1,0 +1,31 @@
+{
+	"name": "DS_SINK_ASQL_movies_metadata_driven",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ASQL_movies",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"destination_schema_name": {
+				"type": "string"
+			},
+			"destination_table_name": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@dataset().destination_schema_name",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@dataset().destination_table_name",
+				"type": "Expression"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

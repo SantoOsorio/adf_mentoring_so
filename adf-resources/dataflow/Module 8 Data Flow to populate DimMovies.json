@@ -1,0 +1,76 @@
+{
+	"name": "Module 8 Data Flow to populate DimMovies",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DS_SOURCE_ASQL_movies_dbo_tMovies",
+						"type": "DatasetReference"
+					},
+					"name": "tMovies"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DS_SINK_ASQL_DataMart_dbo_DimMovie",
+						"type": "DatasetReference"
+					},
+					"name": "DimMovies"
+				}
+			],
+			"transformations": [
+				{
+					"name": "CreateTwoNewColumns"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          MovieIdNK as integer,",
+				"          Title as string,",
+				"          ReleaseDate as date,",
+				"          Runtime as integer,",
+				"          MovieStatusName as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT  DISTINCT     \\n     m.[MovieIdNK],          \\n     m.[Title],\\n     m.[ReleaseDate],\\n     m.[Runtime],\\n     mstatus.[MovieStatusName]\\n  FROM [dbo].[tMovies] m\\n  LEFT JOIN dbo.[tMovieStatus] mstatus on M.MovieStatusId = mstatus.MovieStatusId',",
+				"     format: 'query') ~> tMovies",
+				"tMovies derive(CreatedDate = currentUTC(),",
+				"          ModifiedDate = currentUTC()) ~> CreateTwoNewColumns",
+				"CreateTwoNewColumns sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          MovieKey as integer,",
+				"          MovieIdNK as integer,",
+				"          Title as string,",
+				"          ReleaseDate as date,",
+				"          Runtime as integer,",
+				"          MovieStatus as string,",
+				"          CreatedDate as timestamp,",
+				"          ModifiedDate as timestamp",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          MovieIdNK,",
+				"          Title,",
+				"          ReleaseDate,",
+				"          Runtime,",
+				"          MovieStatus = MovieStatusName,",
+				"          CreatedDate,",
+				"          ModifiedDate",
+				"     )) ~> DimMovies"
+			]
+		}
+	}
+}

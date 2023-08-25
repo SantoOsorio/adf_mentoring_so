@@ -1,0 +1,19 @@
+{
+	"name": "LS_ABLB_azurementoringstorageso_online",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"description": "Link Service for [online] container",
+		"annotations": [],
+		"type": "AzureBlobStorage",
+		"typeProperties": {
+			"sasUri": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "LS_AKV_mentoring_keyvault_soo",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "kvs-azurementoringstorageso-online-SAS-URL"
+			}
+		}
+	}
+}

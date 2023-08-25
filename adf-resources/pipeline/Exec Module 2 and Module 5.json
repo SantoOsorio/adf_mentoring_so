@@ -1,0 +1,63 @@
+{
+	"name": "Exec Module 2 and Module 5",
+	"properties": {
+		"activities": [
+			{
+				"name": "Exec Module 2 using file ext",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Module 2 Copy activity in pipeline using file extension",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Exec Module 5 Loading Data To Azure SQL Database",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Exec Module 2 using file ext",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Module 5 Loading Data To Azure SQL Database",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Execute Module 5 Archive processed files",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Exec Module 5 Loading Data To Azure SQL Database",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Module 5 Archive processed files",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2023-07-11T20:18:30Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

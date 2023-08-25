@@ -1,0 +1,250 @@
+{
+	"name": "Module 8 Data Flow to populate Dimension tables_old version",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DS_SOURCE_ASQL_movies_dbo_tMovies",
+						"type": "DatasetReference"
+					},
+					"name": "tMovies"
+				},
+				{
+					"dataset": {
+						"referenceName": "DS_SOURCE_ASQL_DataMart_dbo_DimMovie",
+						"type": "DatasetReference"
+					},
+					"name": "DimMovieMaxValue"
+				},
+				{
+					"dataset": {
+						"referenceName": "DS_SOURCE_ASQL_movies_dbo_tOnlineService",
+						"type": "DatasetReference"
+					},
+					"name": "tOnlineService"
+				},
+				{
+					"dataset": {
+						"referenceName": "DS_SOURCE_ASQL_DataMart_dbo_DimOnlineService",
+						"type": "DatasetReference"
+					},
+					"name": "ServiceCodeFromDimOnlineService",
+					"description": "select ServiceCode in tOnlineService"
+				},
+				{
+					"dataset": {
+						"referenceName": "DS_SOURCE_ASQL_movies_dbo_tOnlineService",
+						"type": "DatasetReference"
+					},
+					"name": "tOnlineServiceForInsert"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DS_SINK_ASQL_DataMart_dbo_DimMovie",
+						"type": "DatasetReference"
+					},
+					"name": "DimMovie",
+					"description": "Export data to DS_SINK_ASQL_DataMart_dbo_DimMovie\nI did execute SET IDENTITY_INSERT [DimMovie] ON  to ingest my own surrogated key"
+				},
+				{
+					"dataset": {
+						"referenceName": "DS_SINK_ASQL_DataMart_dbo_DimOnlineService",
+						"type": "DatasetReference"
+					},
+					"name": "DimOnlineService"
+				},
+				{
+					"dataset": {
+						"referenceName": "DS_SINK_ASQL_DataMart_dbo_DimOnlineService",
+						"type": "DatasetReference"
+					},
+					"name": "DimOnlineServiceNewRows"
+				}
+			],
+			"transformations": [
+				{
+					"name": "CreateTwoNewColumns",
+					"description": "Creating CreatedDate and ModifiedDate"
+				},
+				{
+					"name": "MovieKey"
+				},
+				{
+					"name": "join1"
+				},
+				{
+					"name": "AddMaxValueToSink",
+					"description": "Add the maxvalue from the DimMovies to this new flow"
+				},
+				{
+					"name": "CreateTwoNewColumns2",
+					"description": "Creating CreatedDate and ModifiedDate"
+				},
+				{
+					"name": "AlterRow1"
+				},
+				{
+					"name": "join2"
+				},
+				{
+					"name": "CreateTwoNewColumns3"
+				},
+				{
+					"name": "SelectOnlyNullValue",
+					"description": "Select only the rows that do have a NULL value in the ServiceCode. This means that it does not exist in our Destination yet."
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          MovieIdNK as integer,",
+				"          Title as string,",
+				"          ReleaseDate as date,",
+				"          Runtime as integer,",
+				"          MovieStatusName as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT  DISTINCT     \\n     m.[MovieIdNK],          \\n     m.[Title],\\n     m.[ReleaseDate],\\n     m.[Runtime],\\n     mstatus.[MovieStatusName]\\n  FROM [dbo].[tMovies] m\\n  LEFT JOIN dbo.[tMovieStatus] mstatus on M.MovieStatusId = mstatus.MovieStatusId',",
+				"     format: 'query') ~> tMovies",
+				"source(output(",
+				"          maxvalue as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: '  SELECT CASE WHEN MAX([MovieKey]) IS NULL THEN 0\\n                 ELSE MAX([MovieKey]) \\n                 END AS maxvalue\\n                 FROM DBO.DimMovie',",
+				"     format: 'query') ~> DimMovieMaxValue",
+				"source(output(",
+				"          ServiceCode as string,",
+				"          ServiceName as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: '  SELECT DISTINCT\\n          os.ServiceCode,\\n          os.ServiceName  \\n  FROM dbo.tOnlineService os',",
+				"     format: 'query') ~> tOnlineService",
+				"source(output(",
+				"          ServiceCode as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT DISTINCT ServiceCode   FROM [dbo].[DimOnlineService]',",
+				"     format: 'query') ~> ServiceCodeFromDimOnlineService",
+				"source(output(",
+				"          ServiceCode as string,",
+				"          ServiceName as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: '  SELECT DISTINCT\\n          os.ServiceCode,\\n          os.ServiceName  \\n  FROM dbo.tOnlineService os',",
+				"     format: 'query') ~> tOnlineServiceForInsert",
+				"join1 derive(CreatedDate = currentUTC(),",
+				"          ModifiedDate = currentUTC()) ~> CreateTwoNewColumns",
+				"CreateTwoNewColumns keyGenerate(output(MovieKey as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> MovieKey",
+				"tMovies, DimMovieMaxValue join(1==1,",
+				"     joinType:'cross',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"MovieKey derive(MovieKey_NEW = maxvalue + MovieKey) ~> AddMaxValueToSink",
+				"tOnlineService derive(CreatedDate = currentUTC(),",
+				"          ModifiedDate = currentUTC()) ~> CreateTwoNewColumns2",
+				"CreateTwoNewColumns2 alterRow(updateIf(!isNull(ServiceCode))) ~> AlterRow1",
+				"tOnlineServiceForInsert, ServiceCodeFromDimOnlineService join(tOnlineServiceForInsert@ServiceCode == ServiceCodeFromDimOnlineService@ServiceCode,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join2",
+				"SelectOnlyNullValue derive(CreatedDate = currentUTC(),",
+				"          ModifiedDate = currentUTC()) ~> CreateTwoNewColumns3",
+				"join2 filter(isNull(ServiceCodeFromDimOnlineService@ServiceCode)==true()) ~> SelectOnlyNullValue",
+				"AddMaxValueToSink sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          MovieKey as integer,",
+				"          MovieIdNK as integer,",
+				"          Title as string,",
+				"          ReleaseDate as date,",
+				"          Runtime as integer,",
+				"          MovieStatus as string,",
+				"          CreatedDate as timestamp,",
+				"          ModifiedDate as timestamp",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     preSQLs:['TRUNCATE TABLE [dbo].[DimMovie]'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          MovieKey,",
+				"          MovieIdNK,",
+				"          Title,",
+				"          ReleaseDate,",
+				"          Runtime,",
+				"          CreatedDate,",
+				"          ModifiedDate",
+				"     )) ~> DimMovie",
+				"AlterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          ServiceKey as integer,",
+				"          ServiceCode as string,",
+				"          ServiceName as string,",
+				"          CreatedDate as timestamp,",
+				"          ModifiedDate as timestamp",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:true,",
+				"     upsertable:false,",
+				"     keys:['ServiceCode'],",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          ServiceCode,",
+				"          ServiceName,",
+				"          CreatedDate,",
+				"          ModifiedDate",
+				"     )) ~> DimOnlineService",
+				"CreateTwoNewColumns3 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          ServiceKey as integer,",
+				"          ServiceCode as string,",
+				"          ServiceName as string,",
+				"          CreatedDate as timestamp,",
+				"          ModifiedDate as timestamp",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          ServiceCode = tOnlineServiceForInsert@ServiceCode,",
+				"          ServiceName,",
+				"          CreatedDate,",
+				"          ModifiedDate",
+				"     )) ~> DimOnlineServiceNewRows"
+			]
+		}
+	}
+}

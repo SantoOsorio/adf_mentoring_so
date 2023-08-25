@@ -1,0 +1,35 @@
+{
+	"name": "Module 8 Run Module 8 Data Flow to populate Dimension tables",
+	"properties": {
+		"activities": [
+			{
+				"name": "Execute Module 8 Data Flow to populate Dimension tables",
+				"description": "Execute Module 8 Data Flow to populate Dimension tables",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "Module 8 Data Flow to populate Dimension tables_old version",
+						"type": "DataFlowReference"
+					},
+					"integrationRuntime": {
+						"referenceName": "Azure-IR-M8",
+						"type": "IntegrationRuntimeReference"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2023-08-12T00:23:20Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

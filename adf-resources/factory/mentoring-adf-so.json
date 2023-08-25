@@ -1,0 +1,21 @@
+{
+	"name": "mentoring-adf-so",
+	"properties": {
+		"globalParameters": {
+			"URI_Secret_Identifier": {
+				"type": "string",
+				"value": "https://mentoring-key-vault-soo.vault.azure.net/secrets/kvs-azurementoringlogappsso-HTTP-POST-URL/691a9d3fbb1d462c8c4157252f37d496?api-version=7.0"
+			},
+			"receiver": {
+				"type": "string",
+				"value": "santiago_osorio@epam.com"
+			}
+		}
+	},
+	"location": "francecentral",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "bc9403a3-cfed-4fc7-813f-0e6e06e8dcda",
+		"tenantId": "b41b72d0-4e9f-4c26-8a69-f949f367c91d"
+	}
+}

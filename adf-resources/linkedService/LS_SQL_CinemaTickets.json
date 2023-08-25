@@ -1,0 +1,23 @@
+{
+	"name": "LS_SQL_CinemaTickets",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"connectionString": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "LS_AKV_mentoring_keyvault_soo",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "kvs-sqlserverdb-conn-key",
+				"secretVersion": "ef7f93d1a65940d79a1c7573cf2a798c"
+			}
+		},
+		"connectVia": {
+			"referenceName": "selfHostedIntegrationRuntime",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

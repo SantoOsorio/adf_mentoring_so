@@ -1,0 +1,63 @@
+{
+	"name": "Execute all Module 7 pipelines",
+	"properties": {
+		"activities": [
+			{
+				"name": "Execute Module 7 Incremental copy files",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Module 7 Incremental copy files",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Execute Module 7 Load JSON to Azure SQL Database",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Execute Module 7 Incremental copy files",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Module 7 Load JSON to Azure SQL Database",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Execute Module 7 Archive processed json files",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Execute Module 7 Load JSON to Azure SQL Database",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Module 7 Archive processed json files",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2023-08-02T23:22:26Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
